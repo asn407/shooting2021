@@ -3,7 +3,7 @@
 // 2dグラフィックを描写するためのオブジェクトを格納するグローバル変数
 let context;
 
-class Rectangle
+class Block
 {
     constructor(x, y, width, height, color)
     {
@@ -21,7 +21,7 @@ class Rectangle
     }
 }
 
-class Character extends Rectangle
+class Player extends Block
 {
     constructor()
     {
@@ -42,19 +42,19 @@ class Main
         context = canvas.getContext("2d");
 
         this.loopReqest = null;
-        this.character = new Character();
+        this.player = new Player();
         this.update()
     }
 
-    mainLoop()
+    loop()
     {
         context.clearRect(0, 0, 440, 440);
         this.update();
-        this.loopReqest = window.requestAnimationFrame(this.mainLoop);
+        this.loopReqest = window.requestAnimationFrame(this.loop);
     }
 
     update()
     {
-        this.character.draw();
+        this.player.draw();
     }
 }
