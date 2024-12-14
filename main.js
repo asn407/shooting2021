@@ -3,7 +3,7 @@
 // 2dグラフィックを描写するためのオブジェクトを格納するグローバル変数
 let context;
 
-class Rectagle
+class Rectangle
 {
     constructor(x, y, width, height, color)
     {
@@ -21,7 +21,7 @@ class Rectagle
     }
 }
 
-class Character extends Rectagle
+class Character extends Rectangle
 {
     constructor()
     {
