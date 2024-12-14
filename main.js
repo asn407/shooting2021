@@ -29,7 +29,7 @@ class Character extends Rectagle
     }
 }
 
-class MainClass
+class Main
 {
     constructor()
     {
