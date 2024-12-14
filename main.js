@@ -1,17 +1,44 @@
 // 厳格モードで実行
 "use strict";
+// 2dグラフィックを描写するためのオブジェクトを格納するグローバル変数
+let context;
 
-function start()
+class Rectagle
 {
-    // 図形描写の初期化
-    let canvas = document.getElementById("canvas");
-    // 2dグラフィックを描写するためのメソッドやプロパティを持つオブジェクトを取得
-    let context = canvas.getContext("2d");
+    constructor(x, y, width, height, color)
+    {
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+        this.color = color;
+    }
 
-    // テスト
-    // 描画する色を指定するプロパティ => fillStyle
-    context.fillStyle = "red";
+    draw()
+    {
+        context.fillStyle = this.color;
+        context.fillRect(this.x, this.y, this.width, this.height);
+    }
+}
 
-    // 四角形を描画するメソッド => fillRect()
-    context.fillRect(15, 10, 150, 100);
+class Character extends Rectagle
+{
+    constructor()
+    {
+        super(300, 300, 20, 20, "aqua");
+    }
+}
+
+class MainClass
+{
+    constructor()
+    {
+        // 図形描写の初期化
+        let canvas = document.getElementById("canvas");
+        // 2dグラフィックを描写するためのオブジェクトを取得
+        context = canvas.getContext("2d");
+
+        let character = new Character();
+        character.draw();
+    }
 }
