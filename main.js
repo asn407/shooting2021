@@ -27,6 +27,9 @@ class Character extends Rectagle
     {
         super(300, 300, 20, 20, "aqua");
     }
+
+    move()
+    {}
 }
 
 class Main
@@ -38,7 +41,20 @@ class Main
         // 2dグラフィックを描写するためのオブジェクトを取得
         context = canvas.getContext("2d");
 
-        let character = new Character();
-        character.draw();
+        this.loopReqest = null;
+        this.character = new Character();
+        this.update()
+    }
+
+    mainLoop()
+    {
+        context.clearRect(0, 0, 440, 440);
+        this.update();
+        this.loopReqest = window.requestAnimationFrame(this.mainLoop);
+    }
+
+    update()
+    {
+        this.character.draw();
     }
 }
