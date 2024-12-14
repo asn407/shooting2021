@@ -1,11 +1,13 @@
 // 厳格モードで実行
 "use strict";
+
 // 2Dグラフィック描写のオブジェクト
 let context;
-// キー押下情報
-let keyFlag = [];
 
-let loopReqest = null;
+// キー押下情報
+// = [] で初期化しない！！
+// = {} が正しい
+let keyFlag = {};
 
 window.addEventListener("keydown", (e) => {
     keyFlag[e.key] = true;
@@ -14,8 +16,6 @@ window.addEventListener("keydown", (e) => {
 window.addEventListener("keyup", (e) => {
     keyFlag[e.key] = false;
 });
-
-
 
 class Block
 {
@@ -44,35 +44,11 @@ class Player extends Block
 
     move()
     {
-        if (keyFlag["ArrowLeft"] === true)
-        {
-            this.x--;
-        }
+        if (keyFlag["ArrowLeft"])  this.x--;
         if (keyFlag["ArrowUp"])    this.y--;
         if (keyFlag["ArrowRight"]) this.x++;
         if (keyFlag["ArrowDown"])  this.y++;
-        if (keyFlag["w"])          this.x--;
-        if (keyFlag["a"])          this.y--;
-        if (keyFlag["s"])          this.x++;
-        if (keyFlag["d"])          this.y++;
     }
-}
-
-
-
-function main()
-{
-    // 図形描写の初期化
-    let canvas = document.getElementById("canvas");
-    // 2Dグラフィック描写オブジェクトを取得
-    context = canvas.getContext("2d");
-
-    let player = new Player();
-}
-
-function loop()
-{
-    player.draw();
 }
 
 class Main
@@ -81,6 +57,7 @@ class Main
     {
         // 図形描写の初期化
         let canvas = document.getElementById("canvas");
+
         // 2Dグラフィック描写のオブジェクトを取得
         context = canvas.getContext("2d");
 
@@ -92,9 +69,12 @@ class Main
 
     loop()
     {
+        context.clearRect(0, 0, canvas.width, canvas.height);
         this.update();
-        // context.clearRect(0, 0, 440, 440);
-        this.loopReqest = window.requestAnimationFrame(this.loop());
+
+        // requestAnimationFrame のコールバックとして this.loop を渡す際，
+        // this のコンテキストを維持するために bind(this) を使用する
+        this.loopReqest = window.requestAnimationFrame(this.loop.bind(this));
     }
 
     update()
