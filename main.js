@@ -147,7 +147,7 @@ class Main
         // キー入力更新
         this.action();
 
-        // プレイヤーのx軸方向の当たり判定ジャッジ
+        // プレイヤーのx軸方向の当たり判定
         if (this.playerVx)
         {
             let futurePlayer = this.player.copyPlayer();
@@ -163,7 +163,7 @@ class Main
             this.playerVx = 0;
         }
 
-        // プレイヤーのy軸方向の当たり判定ジャッジ
+        // プレイヤーのy軸方向の当たり判定
         if (this.playerVy)
         {
             let futurePlayer = this.player.copyPlayer();
