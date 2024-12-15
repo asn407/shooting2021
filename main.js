@@ -111,10 +111,10 @@ class Main
         {
             for (let j = 0; j < 5; j++)
             {
-                if (futurePlayer.x2 < this.walls[i][j].x1) continue;
-                if (futurePlayer.y2 < this.walls[i][j].y1) continue;
-                if (this.walls[i][j].x2 < futurePlayer.x1) continue;
-                if (this.walls[i][j].y2 < futurePlayer.y1) continue;
+                if (futurePlayer.x2 <= this.walls[i][j].x1) continue;
+                if (futurePlayer.y2 <= this.walls[i][j].y1) continue;
+                if (this.walls[i][j].x2 <= futurePlayer.x1) continue;
+                if (this.walls[i][j].y2 <= futurePlayer.y1) continue;
                 return false;
             }
         }
