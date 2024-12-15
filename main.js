@@ -10,10 +10,12 @@ let context;
 // 配列型で初期化すると動作しないので注意
 let keyFlag = {};
 
+// キーを押したらフラグが立つ
 window.addEventListener("keydown", (e) => {
     keyFlag[e.key] = true;
 });
 
+// キーを離すとフラグが降りる
 window.addEventListener("keyup", (e) => {
     keyFlag[e.key] = false;
 });
@@ -70,10 +72,17 @@ class Main
         context = this.canvas.getContext("2d");
 
         this.loopReqest = null;
+
+        // プレイヤーの方向ベクトル
+        // プレイヤーの当たり判定に用いる
         this.playerVx = 0;
         this.playerVy = 0;
-        this.player = new Player(2, 220);
 
+        // オブジェクトのインスタンス化
+        this.player = new Player(210, 250);
+
+        // オブジェクトのインスタンス化
+        // 5x5の多次元配列に格納する
         this.walls = []
         for (let i = 0; i < 5; i++)
         {
@@ -84,14 +93,18 @@ class Main
             }
         }
 
+        // メインループ実行
         this.loop();
     }
 
     loop()
     {
+        // 画面を初期化
         context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        // ゲームを更新
         this.update();
 
+        // スクリーンに反映
         // requestAnimationFrame のコールバックとして this.loop を渡す際に，
         // this のコンテキストを維持するために bind(this) を使用する
         this.loopReqest = window.requestAnimationFrame(this.loop.bind(this));
@@ -107,6 +120,7 @@ class Main
 
     isPlayerMoveable(futurePlayer)
     {
+        // 壁と衝突しているかの判定
         for (let i = 0; i < 5; i++)
         {
             for (let j = 0; j < 5; j++)
@@ -119,6 +133,7 @@ class Main
             }
         }
 
+        // 画面枠と衝突しているかの判定
         if (futurePlayer.x1 <= 0) return false;
         if (futurePlayer.y1 <= 0) return false;
         if (this.canvas.width <= futurePlayer.x2) return false;
@@ -129,7 +144,10 @@ class Main
 
     update()
     {
+        // キー入力更新
         this.action();
+
+        // プレイヤーのx軸方向の当たり判定ジャッジ
         if (this.playerVx)
         {
             let futurePlayer = this.player.copyPlayer();
@@ -145,6 +163,7 @@ class Main
             this.playerVx = 0;
         }
 
+        // プレイヤーのy軸方向の当たり判定ジャッジ
         if (this.playerVy)
         {
             let futurePlayer = this.player.copyPlayer();
