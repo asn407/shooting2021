@@ -76,10 +76,10 @@ class Main
         this.walls = []
         for (let i = 0; i < 5; i++)
         {
-            walls[i] = []
+            this.walls[i] = []
             for (let j = 0; j < 5; j++)
             {
-                walls[i][j] = new Wall(j * 80 + 40, i * 80 + 40);
+                this.walls[i][j] = new Wall(j * 80 + 40, i * 80 + 40);
             }
         }
 
@@ -100,6 +100,6 @@ class Main
     {
         this.player.move();
         this.player.draw();
-        // this.walls.forEach(ey => ey.forEach(ex => ex.draw()));
+        this.walls.forEach(ey => ey.forEach(ex => ex.draw()));
     }
 }
