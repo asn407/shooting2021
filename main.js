@@ -64,10 +64,10 @@ class Main
     constructor()
     {
         // 図形描写の初期化
-        let canvas = document.getElementById("canvas");
+        this.canvas = document.getElementById("canvas");
 
         // 2Dグラフィック描写のオブジェクトを取得
-        context = canvas.getContext("2d");
+        context = this.canvas.getContext("2d");
 
         this.loopReqest = null;
         this.playerVx = 0;
@@ -89,7 +89,7 @@ class Main
 
     loop()
     {
-        context.clearRect(0, 0, canvas.width, canvas.height);
+        context.clearRect(0, 0, this.canvas.width, this.canvas.height);
         this.update();
 
         // requestAnimationFrame のコールバックとして this.loop を渡す際に，
@@ -125,7 +125,7 @@ class Main
     update()
     {
         this.action();
-        if (this.playerVx !== 0)
+        if (this.playerVx)
         {
             let futurePlayer = this.player.copyPlayer();
             futurePlayer.x1 += this.playerVx;
@@ -140,7 +140,7 @@ class Main
             this.playerVx = 0;
         }
 
-        if (this.playerVy !== 0)
+        if (this.playerVy)
         {
             let futurePlayer = this.player.copyPlayer();
             futurePlayer.y1 += this.playerVy;
