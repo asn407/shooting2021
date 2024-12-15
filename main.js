@@ -36,11 +36,19 @@ class Block
     }
 }
 
+class Wall extends Block
+{
+    constructor(x, y)
+    {
+        super(x, y, 40, 40, "red");
+    }
+}
+
 class Player extends Block
 {
-    constructor()
+    constructor(x, y)
     {
-        super(300, 300, 20, 20, "aqua");
+        super(x, y, 20, 20, "aqua");
     }
 
     move()
@@ -63,7 +71,17 @@ class Main
         context = canvas.getContext("2d");
 
         this.loopReqest = null;
-        this.player = new Player();
+        this.player = new Player(300, 300);
+
+        this.walls = []
+        for (let i = 0; i < 5; i++)
+        {
+            walls[i] = []
+            for (let j = 0; j < 5; j++)
+            {
+                walls[i][j] = new Wall(j * 80 + 40, i * 80 + 40);
+            }
+        }
 
         this.loop();
     }
@@ -82,5 +100,6 @@ class Main
     {
         this.player.move();
         this.player.draw();
+        // this.walls.forEach(ey => ey.forEach(ex => ex.draw()));
     }
 }
