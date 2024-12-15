@@ -10,12 +10,12 @@ let context;
 // 配列型で初期化すると動作しないので注意
 let keyFlag = {};
 
-// キーを押したらフラグが立つ
+// キーを押したらフラグが上がる
 window.addEventListener("keydown", (e) => {
     keyFlag[e.key] = true;
 });
 
-// キーを離すとフラグが降りる
+// キーを離すとフラグが下がる
 window.addEventListener("keyup", (e) => {
     keyFlag[e.key] = false;
 });
