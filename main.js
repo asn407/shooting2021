@@ -5,8 +5,9 @@
 let context;
 
 // キー押下情報
-// = [] で初期化しない！！
-// = {} が正しい
+// = [] 配列型
+// = {} 連想配列型
+// 配列型で初期化すると動作しないので注意
 let keyFlag = {};
 
 window.addEventListener("keydown", (e) => {
@@ -72,7 +73,7 @@ class Main
         context.clearRect(0, 0, canvas.width, canvas.height);
         this.update();
 
-        // requestAnimationFrame のコールバックとして this.loop を渡す際，
+        // requestAnimationFrame のコールバックとして this.loop を渡す際に，
         // this のコンテキストを維持するために bind(this) を使用する
         this.loopReqest = window.requestAnimationFrame(this.loop.bind(this));
     }
