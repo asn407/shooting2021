@@ -119,6 +119,11 @@ class Main
             }
         }
 
+        if (futurePlayer.x1 <= 0) return false;
+        if (futurePlayer.y1 <= 0) return false;
+        if (this.canvas.width <= futurePlayer.x2) return false;
+        if (this.canvas.height <= futurePlayer.y2) return false;
+
         return true;
     }
 
