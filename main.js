@@ -8,17 +8,22 @@ let context;
 // = [] 配列型
 // = {} 連想配列型
 // 配列型で初期化すると動作しないので注意
-let keyFlag = {};
+let keyPush = {};
 
 // キーを押すとフラグが上がる
 window.addEventListener("keydown", (e) => {
-    keyFlag[e.key] = true;
+    keyPush[e.key] = true;
 });
 
 // キーを離すとフラグが下がる
 window.addEventListener("keyup", (e) => {
-    keyFlag[e.key] = false;
+    keyPush[e.key] = false;
 });
+
+function resetKeyState(keyIndex)
+{
+    keyPush[keyIndex] = false;
+}
 
 class Block
 {
@@ -48,6 +53,14 @@ class Wall extends Block
     }
 }
 
+class Bullet extends Block
+{
+    constructor(x1, y1)
+    {
+        super(x1, y1, 5, 5, "yellow");
+    }
+}
+
 class Player extends Block
 {
     constructor(x1, y1)
@@ -58,6 +71,11 @@ class Player extends Block
     copyPlayer()
     {
         return new Player(this.x1, this.y1);
+    }
+
+    shot()
+    {
+        return new Bullet(this.x1, this.y1);
     }
 }
 
@@ -93,6 +111,8 @@ class Main
             }
         }
 
+        this.bullets = [];
+
         // メインループ実行
         this.loop();
     }
@@ -112,10 +132,11 @@ class Main
 
     action()
     {
-        if (keyFlag["ArrowLeft"])  this.playerVx = -1;
-        if (keyFlag["ArrowUp"])    this.playerVy = -1;
-        if (keyFlag["ArrowRight"]) this.playerVx = 1;
-        if (keyFlag["ArrowDown"])  this.playerVy = 1;
+        if (keyPush["ArrowLeft"])  this.playerVx = -1;
+        if (keyPush["ArrowUp"])    this.playerVy = -1;
+        if (keyPush["ArrowRight"]) this.playerVx = 1;
+        if (keyPush["ArrowDown"])  this.playerVy = 1;
+        if (keyPush["z"]) this.bullets.push(this.player.shot());
     }
 
     isPlayerMoveable(futurePlayer)
@@ -181,5 +202,8 @@ class Main
 
         this.player.draw();
         this.walls.forEach(ey => ey.forEach(ex => ex.draw()));
+        if (this.bullets.length) this.bullets.forEach(e => e.draw());
+
+        resetKeyState("z");
     }
 }
