@@ -20,10 +20,12 @@ window.addEventListener("keyup", (e) => {
 
 class Block
 {
-    constructor(x, y, width, height, color)
+    constructor(x1, y1, width, height, color)
     {
-        this.x = x;
-        this.y = y;
+        this.x1 = x1;
+        this.y1 = y1;
+        this.x2 = x1 + width;
+        this.y2 = y1 + height;
         this.width = width;
         this.height = height;
         this.color = color;
@@ -32,31 +34,28 @@ class Block
     draw()
     {
         context.fillStyle = this.color;
-        context.fillRect(this.x, this.y, this.width, this.height);
+        context.fillRect(this.x1, this.y1, this.width, this.height);
     }
 }
 
 class Wall extends Block
 {
-    constructor(x, y)
+    constructor(x1, y1)
     {
-        super(x, y, 40, 40, "red");
+        super(x1, y1, 40, 40, "red");
     }
 }
 
 class Player extends Block
 {
-    constructor(x, y)
+    constructor(x1, y1)
     {
-        super(x, y, 20, 20, "aqua");
+        super(x1, y1, 20, 20, "aqua");
     }
 
-    move()
+    copyPlayer()
     {
-        if (keyFlag["ArrowLeft"])  this.x--;
-        if (keyFlag["ArrowUp"])    this.y--;
-        if (keyFlag["ArrowRight"]) this.x++;
-        if (keyFlag["ArrowDown"])  this.y++;
+        return new Player(this.x1, this.y1);
     }
 }
 
@@ -71,7 +70,9 @@ class Main
         context = canvas.getContext("2d");
 
         this.loopReqest = null;
-        this.player = new Player(300, 300);
+        this.playerVx = 0;
+        this.playerVy = 0;
+        this.player = new Player(2, 220);
 
         this.walls = []
         for (let i = 0; i < 5; i++)
@@ -96,9 +97,64 @@ class Main
         this.loopReqest = window.requestAnimationFrame(this.loop.bind(this));
     }
 
+    action()
+    {
+        if (keyFlag["ArrowLeft"])  this.playerVx = -1;
+        if (keyFlag["ArrowUp"])    this.playerVy = -1;
+        if (keyFlag["ArrowRight"]) this.playerVx = 1;
+        if (keyFlag["ArrowDown"])  this.playerVy = 1;
+    }
+
+    isPlayerMoveable(futurePlayer)
+    {
+        for (let i = 0; i < 5; i++)
+        {
+            for (let j = 0; j < 5; j++)
+            {
+                if (futurePlayer.x2 < this.walls[i][j].x1) break;
+                if (futurePlayer.y2 < this.walls[i][j].y1) break;
+                if (this.walls[i][j].x2 < futurePlayer.x1) break;
+                if (this.walls[i][j].y2 < futurePlayer.y1) break;
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     update()
     {
-        this.player.move();
+        this.action();
+        if (this.playerVx !== 0)
+        {
+            let futurePlayer = this.player.copyPlayer();
+            futurePlayer.x1 += this.playerVx;
+            futurePlayer.x2 += this.playerVx;
+
+            if (this.isPlayerMoveable(futurePlayer))
+            {
+                this.player.x1 += this.playerVx;
+                this.player.x2 += this.playerVx;
+            }
+
+            this.playerVx = 0;
+        }
+
+        if (this.playerVy !== 0)
+        {
+            let futurePlayer = this.player.copyPlayer();
+            futurePlayer.y1 += this.playerVy;
+            futurePlayer.y2 += this.playerVy;
+
+            if (this.isPlayerMoveable(futurePlayer))
+            {
+                this.player.y1 += this.playerVy;
+                this.player.y2 += this.playerVy;
+            }
+
+            this.playerVy = 0;
+        }
+
         this.player.draw();
         this.walls.forEach(ey => ey.forEach(ex => ex.draw()));
     }
