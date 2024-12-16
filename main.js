@@ -198,7 +198,7 @@ class Main
         if (keyPush["z"] && this.bullets.length < 5) this.bullets.push(this.player.shot());
     }
 
-    isObjectDontTouchWalls(futureObject)
+    isObjectDontTouchWallsAndFrame(futureObject)
     {
         // 壁と衝突しているかの判定
         for (let i = 0; i < 5; i++)
@@ -239,7 +239,7 @@ class Main
             futurePlayer.x1 += this.player.vector.x;
             futurePlayer.x2 += this.player.vector.x;
 
-            if (this.isObjectDontTouchWalls(futurePlayer))
+            if (this.isObjectDontTouchWallsAndFrame(futurePlayer))
             {
                 this.player.x1 += this.player.vector.x;
                 this.player.x2 += this.player.vector.x;
@@ -253,7 +253,7 @@ class Main
             futurePlayer.y1 += this.player.vector.y;
             futurePlayer.y2 += this.player.vector.y;
 
-            if (this.isObjectDontTouchWalls(futurePlayer))
+            if (this.isObjectDontTouchWallsAndFrame(futurePlayer))
             {
                 this.player.y1 += this.player.vector.y;
                 this.player.y2 += this.player.vector.y;
@@ -265,7 +265,7 @@ class Main
         {
             let futureBullet = this.bullets[i].futureMove();
 
-            if (this.isObjectDontTouchWalls(futureBullet))
+            if (this.isObjectDontTouchWallsAndFrame(futureBullet))
             {
                 // 壁や画面枠に触れていない
                 this.bullets[i].move();
