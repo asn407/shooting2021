@@ -55,17 +55,27 @@ class Wall extends Block
 
 class Bullet extends Block
 {
-    constructor(x1, y1)
+    constructor(x1, y1, dir_x, dir_y)
     {
         super(x1, y1, 5, 5, "yellow");
+        this.dir_x = dir_x;
+        this.dir_y = dir_y;
+    }
+
+    move()
+    {
+        this.x1 += this.dir_x;
+        this.y1 += this.dir_y;
     }
 }
 
 class Player extends Block
 {
-    constructor(x1, y1)
+    constructor(x1, y1, dir_x, dir_y)
     {
         super(x1, y1, 20, 20, "aqua");
+        this.dir_x = dir_x;
+        this.dir_y = dir_y;
     }
 
     copyPlayer()
@@ -75,7 +85,7 @@ class Player extends Block
 
     shot()
     {
-        return new Bullet(this.x1, this.y1);
+        return new Bullet(this.x1, this.y1, this.dir_x, this.dir_y);
     }
 }
 
@@ -97,7 +107,7 @@ class Main
         this.playerVy = 0;
 
         // オブジェクトのインスタンス化
-        this.player = new Player(210, 250);
+        this.player = new Player(210, 250, );
 
         // オブジェクトのインスタンス化
         // 5x5の多次元配列に格納する
@@ -180,8 +190,6 @@ class Main
                 this.player.x1 += this.playerVx;
                 this.player.x2 += this.playerVx;
             }
-
-            this.playerVx = 0;
         }
 
         // プレイヤーのy軸方向の当たり判定
@@ -196,14 +204,19 @@ class Main
                 this.player.y1 += this.playerVy;
                 this.player.y2 += this.playerVy;
             }
-
-            this.playerVy = 0;
         }
+
+        this.player.dir_x = this.playerVx;
+        this.player.dir_y = this.playerVy;
 
         this.player.draw();
         this.walls.forEach(ey => ey.forEach(ex => ex.draw()));
+
+        if (this.bullets.length) this.bullets.forEach(e => e.move());
         if (this.bullets.length) this.bullets.forEach(e => e.draw());
 
+        this.playerVx = 0;
+        this.playerVy = 0;
         resetKeyState("z");
     }
 }
