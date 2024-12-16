@@ -20,6 +20,15 @@ window.addEventListener("keyup", (e) => {
     keyPush[e.key] = false;
 });
 
+class Vector
+{
+    constructor(x, y)
+    {
+        this.x = x;
+        this.y = y;
+    }
+}
+
 class Block
 {
     constructor(x1, y1, width, height, color)
@@ -53,7 +62,13 @@ class Bullet extends Block
     constructor(x1, y1, size, direction)
     {
         super(x1, y1, size, size, "yellow");
+        this.size = size;
         this.direction = direction;
+    }
+
+    copyBullet()
+    {
+        return new Bullet(this.x1, this.y1, this.size, this.direction);
     }
 
     move()
@@ -66,14 +81,19 @@ class Bullet extends Block
             case "down":  this.y1++; break;
         }
     }
-}
 
-class Vector
-{
-    constructor(x, y)
+    futureMove()
     {
-        this.x = x;
-        this.y = y;
+        let futureBullet = this.copyBullet();
+        switch (this.direction)
+        {
+            case "left":  futureBullet.x1--; break;
+            case "up":    futureBullet.y1--; break;
+            case "right": futureBullet.x1++; break;
+            case "down":  futureBullet.y1++; break;
+        }
+
+        return futureBullet;
     }
 }
 
@@ -175,26 +195,26 @@ class Main
         if (keyPush["z"]) this.bullets.push(this.player.shot());
     }
 
-    isPlayerMoveable(futurePlayer)
+    isObjectDontTouchWalls(futureObject)
     {
         // 壁と衝突しているかの判定
         for (let i = 0; i < 5; i++)
         {
             for (let j = 0; j < 5; j++)
             {
-                if (futurePlayer.x2 <= this.walls[i][j].x1) continue;
-                if (futurePlayer.y2 <= this.walls[i][j].y1) continue;
-                if (this.walls[i][j].x2 <= futurePlayer.x1) continue;
-                if (this.walls[i][j].y2 <= futurePlayer.y1) continue;
+                if (futureObject.x2 <= this.walls[i][j].x1) continue;
+                if (futureObject.y2 <= this.walls[i][j].y1) continue;
+                if (this.walls[i][j].x2 <= futureObject.x1) continue;
+                if (this.walls[i][j].y2 <= futureObject.y1) continue;
                 return false;
             }
         }
 
         // 画面枠と衝突しているかの判定
-        if (futurePlayer.x1 <= 0) return false;
-        if (futurePlayer.y1 <= 0) return false;
-        if (this.canvas.width <= futurePlayer.x2) return false;
-        if (this.canvas.height <= futurePlayer.y2) return false;
+        if (futureObject.x1 <= 0) return false;
+        if (futureObject.y1 <= 0) return false;
+        if (this.canvas.width <= futureObject.x2) return false;
+        if (this.canvas.height <= futureObject.y2) return false;
 
         return true;
     }
@@ -216,7 +236,7 @@ class Main
             futurePlayer.x1 += this.player.vector.x;
             futurePlayer.x2 += this.player.vector.x;
 
-            if (this.isPlayerMoveable(futurePlayer))
+            if (this.isObjectDontTouchWalls(futurePlayer))
             {
                 this.player.x1 += this.player.vector.x;
                 this.player.x2 += this.player.vector.x;
@@ -230,17 +250,27 @@ class Main
             futurePlayer.y1 += this.player.vector.y;
             futurePlayer.y2 += this.player.vector.y;
 
-            if (this.isPlayerMoveable(futurePlayer))
+            if (this.isObjectDontTouchWalls(futurePlayer))
             {
                 this.player.y1 += this.player.vector.y;
                 this.player.y2 += this.player.vector.y;
             }
         }
 
+        for (let i = 0; i < this.bullets.length; i++)
+        {
+            let futureBullet = this.bullets[i].futureMove();
+
+            if (this.isObjectDontTouchWalls(futureBullet))
+            {
+                this.bullets[i].move();
+            }
+        }
+
         this.player.draw();
         this.walls.forEach(ey => ey.forEach(ex => ex.draw()));
 
-        if (this.bullets.length) this.bullets.forEach(e => e.move());
+        // if (this.bullets.length) this.bullets.forEach(e => e.move());
         if (this.bullets.length) this.bullets.forEach(e => e.draw());
 
         this.player.resetVector();
