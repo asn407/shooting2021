@@ -55,37 +55,40 @@ class Wall extends Block
 
 class Bullet extends Block
 {
-    constructor(x1, y1, dir_x, dir_y)
+    constructor(x1, y1, direction)
     {
         super(x1, y1, 5, 5, "yellow");
-        this.dir_x = dir_x;
-        this.dir_y = dir_y;
+        this.direction = direction;
     }
 
     move()
     {
-        this.x1 += this.dir_x;
-        this.y1 += this.dir_y;
+        switch (this.direction)
+        {
+            case "left":  this.x1--; break;
+            case "up":    this.y1--; break;
+            case "right": this.x1++; break;
+            case "down":  this.y1++; break;
+        }
     }
 }
 
 class Player extends Block
 {
-    constructor(x1, y1, dir_x, dir_y)
+    constructor(x1, y1, direction)
     {
         super(x1, y1, 20, 20, "aqua");
-        this.dir_x = dir_x;
-        this.dir_y = dir_y;
+        this.direction = direction;
     }
 
     copyPlayer()
     {
-        return new Player(this.x1, this.y1);
+        return new Player(this.x1, this.y1, this.direction);
     }
 
     shot()
     {
-        return new Bullet(this.x1, this.y1, this.dir_x, this.dir_y);
+        return new Bullet(this.x1, this.y1, this.direction);
     }
 }
 
@@ -107,7 +110,7 @@ class Main
         this.playerVy = 0;
 
         // オブジェクトのインスタンス化
-        this.player = new Player(210, 250, );
+        this.player = new Player(210, 250, "up");
 
         // オブジェクトのインスタンス化
         // 5x5の多次元配列に格納する
@@ -142,10 +145,26 @@ class Main
 
     action()
     {
-        if (keyPush["ArrowLeft"])  this.playerVx = -1;
-        if (keyPush["ArrowUp"])    this.playerVy = -1;
-        if (keyPush["ArrowRight"]) this.playerVx = 1;
-        if (keyPush["ArrowDown"])  this.playerVy = 1;
+        if (keyPush["ArrowLeft"])
+        {
+            this.playerVx = -1;
+            this.player.direction = "left";
+        }
+        if (keyPush["ArrowUp"])
+        {
+            this.playerVy = -1;
+            this.player.direction = "up";
+        }
+        if (keyPush["ArrowRight"])
+        {
+            this.playerVx = 1;
+            this.player.direction = "right";
+        }
+        if (keyPush["ArrowDown"])
+        {
+            this.playerVy = 1;
+            this.player.direction = "down";
+        }
         if (keyPush["z"]) this.bullets.push(this.player.shot());
     }
 
@@ -205,9 +224,6 @@ class Main
                 this.player.y2 += this.playerVy;
             }
         }
-
-        this.player.dir_x = this.playerVx;
-        this.player.dir_y = this.playerVy;
 
         this.player.draw();
         this.walls.forEach(ey => ey.forEach(ex => ex.draw()));
