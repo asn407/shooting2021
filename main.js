@@ -8,18 +8,29 @@ let context;
 // = [] 配列型
 // = {} 連想配列型
 // 配列型で初期化すると動作しないので注意
-let keyFlag = {};
+let keyPush = {};
 
-// キーを押したらフラグが立つ
+// キーを押すとフラグが上がる
 window.addEventListener("keydown", (e) => {
-    keyFlag[e.key] = true;
+    keyPush[e.key] = true;
 });
 
-// キーを離すとフラグが降りる
+// キーを離すとフラグが下がる
 window.addEventListener("keyup", (e) => {
-    keyFlag[e.key] = false;
+    keyPush[e.key] = false;
 });
 
+// プレイヤーの当たり判定に用いる
+class Vector
+{
+    constructor(x, y)
+    {
+        this.x = x;
+        this.y = y;
+    }
+}
+
+// 基底クラス
 class Block
 {
     constructor(x1, y1, width, height, color)
@@ -42,22 +53,76 @@ class Block
 
 class Wall extends Block
 {
-    constructor(x1, y1)
+    constructor(x1, y1, size)
     {
-        super(x1, y1, 40, 40, "red");
+        super(x1, y1, size, size, "red");
+    }
+}
+
+class Bullet extends Block
+{
+    constructor(x1, y1, size, direction)
+    {
+        super(x1, y1, size, size, "yellow");
+        this.size = size;
+        this.direction = direction;
+    }
+
+    copyBullet()
+    {
+        return new Bullet(this.x1, this.y1, this.size, this.direction);
+    }
+
+    move()
+    {
+        switch (this.direction)
+        {
+            case "left":  this.x1--; break;
+            case "up":    this.y1--; break;
+            case "right": this.x1++; break;
+            case "down":  this.y1++; break;
+        }
+    }
+
+    futureMove()
+    {
+        let futureBullet = this.copyBullet();
+        switch (this.direction)
+        {
+            case "left":  futureBullet.x1--; break;
+            case "up":    futureBullet.y1--; break;
+            case "right": futureBullet.x1++; break;
+            case "down":  futureBullet.y1++; break;
+        }
+
+        return futureBullet;
     }
 }
 
 class Player extends Block
 {
-    constructor(x1, y1)
+    constructor(x1, y1, size, direction)
     {
-        super(x1, y1, 20, 20, "aqua");
+        super(x1, y1, size, size, "aqua");
+        this.size = size;
+        this.direction = direction;
+        this.vector = new Vector(0, 0);
     }
 
     copyPlayer()
     {
-        return new Player(this.x1, this.y1);
+        return new Player(this.x1, this.y1, this.size, this.direction);
+    }
+
+    resetVector()
+    {
+        this.vector.x = 0;
+        this.vector.y = 0;
+    }
+
+    shot()
+    {
+        return new Bullet(this.x1 + 7, this.y1 + 7, 6, this.direction);
     }
 }
 
@@ -71,15 +136,12 @@ class Main
         // 2Dグラフィック描写のオブジェクトを取得
         context = this.canvas.getContext("2d");
 
+        // ループリクエスト
+        // ループキャンセルの引数として使用する
         this.loopReqest = null;
 
-        // プレイヤーの方向ベクトル
-        // プレイヤーの当たり判定に用いる
-        this.playerVx = 0;
-        this.playerVy = 0;
-
         // オブジェクトのインスタンス化
-        this.player = new Player(210, 250);
+        this.player = new Player(210, 250, 20, "up");
 
         // オブジェクトのインスタンス化
         // 5x5の多次元配列に格納する
@@ -89,9 +151,13 @@ class Main
             this.walls[i] = []
             for (let j = 0; j < 5; j++)
             {
-                this.walls[i][j] = new Wall(j * 80 + 40, i * 80 + 40);
+                this.walls[i][j] = new Wall(j * 80 + 40, i * 80 + 40, 40);
             }
         }
+
+        // 弾オブジェクトを格納する配列
+        // 初期段階は空
+        this.bullets = [];
 
         // メインループ実行
         this.loop();
@@ -110,36 +176,59 @@ class Main
         this.loopReqest = window.requestAnimationFrame(this.loop.bind(this));
     }
 
+    // キー入力時の処理
     action()
     {
-        if (keyFlag["ArrowLeft"])  this.playerVx = -1;
-        if (keyFlag["ArrowUp"])    this.playerVy = -1;
-        if (keyFlag["ArrowRight"]) this.playerVx = 1;
-        if (keyFlag["ArrowDown"])  this.playerVy = 1;
+        if (keyPush["ArrowLeft"])
+        {
+            this.player.vector.x = -1;
+            this.player.direction = "left";
+        }
+        if (keyPush["ArrowUp"])
+        {
+            this.player.vector.y = -1;
+            this.player.direction = "up";
+        }
+        if (keyPush["ArrowRight"])
+        {
+            this.player.vector.x = 1;
+            this.player.direction = "right";
+        }
+        if (keyPush["ArrowDown"])
+        {
+            this.player.vector.y = 1;
+            this.player.direction = "down";
+        }
+        if (keyPush["z"] && this.bullets.length < 5) this.bullets.push(this.player.shot());
     }
 
-    isPlayerMoveable(futurePlayer)
+    isObjectDontTouchWallsAndFrame(futureObject)
     {
         // 壁と衝突しているかの判定
         for (let i = 0; i < 5; i++)
         {
             for (let j = 0; j < 5; j++)
             {
-                if (futurePlayer.x2 <= this.walls[i][j].x1) continue;
-                if (futurePlayer.y2 <= this.walls[i][j].y1) continue;
-                if (this.walls[i][j].x2 <= futurePlayer.x1) continue;
-                if (this.walls[i][j].y2 <= futurePlayer.y1) continue;
+                if (futureObject.x2 <= this.walls[i][j].x1) continue;
+                if (futureObject.y2 <= this.walls[i][j].y1) continue;
+                if (this.walls[i][j].x2 <= futureObject.x1) continue;
+                if (this.walls[i][j].y2 <= futureObject.y1) continue;
                 return false;
             }
         }
 
         // 画面枠と衝突しているかの判定
-        if (futurePlayer.x1 <= 0) return false;
-        if (futurePlayer.y1 <= 0) return false;
-        if (this.canvas.width <= futurePlayer.x2) return false;
-        if (this.canvas.height <= futurePlayer.y2) return false;
+        if (futureObject.x1 <= 0) return false;
+        if (futureObject.y1 <= 0) return false;
+        if (this.canvas.width <= futureObject.x2) return false;
+        if (this.canvas.height <= futureObject.y2) return false;
 
         return true;
+    }
+
+    resetKeyState(keyIndex)
+    {
+        keyPush[keyIndex] = false;
     }
 
     update()
@@ -147,39 +236,57 @@ class Main
         // キー入力更新
         this.action();
 
-        // プレイヤーのx軸方向の当たり判定ジャッジ
-        if (this.playerVx)
+        // プレイヤーのx軸方向の当たり判定
+        if (this.player.vector.x)
         {
             let futurePlayer = this.player.copyPlayer();
-            futurePlayer.x1 += this.playerVx;
-            futurePlayer.x2 += this.playerVx;
+            futurePlayer.x1 += this.player.vector.x;
+            futurePlayer.x2 += this.player.vector.x;
 
-            if (this.isPlayerMoveable(futurePlayer))
+            if (this.isObjectDontTouchWallsAndFrame(futurePlayer))
             {
-                this.player.x1 += this.playerVx;
-                this.player.x2 += this.playerVx;
+                this.player.x1 += this.player.vector.x;
+                this.player.x2 += this.player.vector.x;
             }
-
-            this.playerVx = 0;
         }
 
-        // プレイヤーのy軸方向の当たり判定ジャッジ
-        if (this.playerVy)
+        // プレイヤーのy軸方向の当たり判定
+        if (this.player.vector.y)
         {
             let futurePlayer = this.player.copyPlayer();
-            futurePlayer.y1 += this.playerVy;
-            futurePlayer.y2 += this.playerVy;
+            futurePlayer.y1 += this.player.vector.y;
+            futurePlayer.y2 += this.player.vector.y;
 
-            if (this.isPlayerMoveable(futurePlayer))
+            if (this.isObjectDontTouchWallsAndFrame(futurePlayer))
             {
-                this.player.y1 += this.playerVy;
-                this.player.y2 += this.playerVy;
+                this.player.y1 += this.player.vector.y;
+                this.player.y2 += this.player.vector.y;
             }
+        }
 
-            this.playerVy = 0;
+        // 弾の当たり判定
+        for (let i = 0; i < this.bullets.length; i++)
+        {
+            let futureBullet = this.bullets[i].futureMove();
+
+            if (this.isObjectDontTouchWallsAndFrame(futureBullet))
+            {
+                // 壁や画面枠に触れていない
+                this.bullets[i].move();
+            }
+            else
+            {
+                // 壁や画面枠に触れる
+                // -> 弾を消去
+                this.bullets.shift();
+            }
         }
 
         this.player.draw();
         this.walls.forEach(ey => ey.forEach(ex => ex.draw()));
+        if (this.bullets.length) this.bullets.forEach(e => e.draw());
+
+        this.player.resetVector();
+        this.resetKeyState("z");
     }
 }
