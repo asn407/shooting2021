@@ -47,17 +47,17 @@ class Block
 
 class Wall extends Block
 {
-    constructor(x1, y1)
+    constructor(x1, y1, size)
     {
-        super(x1, y1, 40, 40, "red");
+        super(x1, y1, size, size, "red");
     }
 }
 
 class Bullet extends Block
 {
-    constructor(x1, y1, direction)
+    constructor(x1, y1, size, direction)
     {
-        super(x1, y1, 6, 6, "yellow");
+        super(x1, y1, size, size, "yellow");
         this.direction = direction;
     }
 
@@ -75,20 +75,21 @@ class Bullet extends Block
 
 class Player extends Block
 {
-    constructor(x1, y1, direction)
+    constructor(x1, y1, size, direction)
     {
-        super(x1, y1, 20, 20, "aqua");
+        super(x1, y1, size, size, "aqua");
+        this.size = size;
         this.direction = direction;
     }
 
     copyPlayer()
     {
-        return new Player(this.x1, this.y1, this.direction);
+        return new Player(this.x1, this.y1, this.size, this.direction);
     }
 
     shot()
     {
-        return new Bullet(this.x1 + 7, this.y1 + 7, this.direction);
+        return new Bullet(this.x1 + 7, this.y1 + 7, 6, this.direction);
     }
 }
 
@@ -110,7 +111,7 @@ class Main
         this.playerVy = 0;
 
         // オブジェクトのインスタンス化
-        this.player = new Player(210, 250, "up");
+        this.player = new Player(210, 250, 20, "up");
 
         // オブジェクトのインスタンス化
         // 5x5の多次元配列に格納する
@@ -120,7 +121,7 @@ class Main
             this.walls[i] = []
             for (let j = 0; j < 5; j++)
             {
-                this.walls[i][j] = new Wall(j * 80 + 40, i * 80 + 40);
+                this.walls[i][j] = new Wall(j * 80 + 40, i * 80 + 40, 40);
             }
         }
 
