@@ -20,6 +20,7 @@ window.addEventListener("keyup", (e) => {
     keyPush[e.key] = false;
 });
 
+// プレイヤーの当たり判定に用いる
 class Vector
 {
     constructor(x, y)
@@ -29,6 +30,7 @@ class Vector
     }
 }
 
+// 基底クラス
 class Block
 {
     constructor(x1, y1, width, height, color)
@@ -170,6 +172,7 @@ class Main
         this.loopReqest = window.requestAnimationFrame(this.loop.bind(this));
     }
 
+    // キー入力時の処理
     action()
     {
         if (keyPush["ArrowLeft"])
@@ -257,24 +260,26 @@ class Main
             }
         }
 
+        // 弾の当たり判定
         for (let i = 0; i < this.bullets.length; i++)
         {
             let futureBullet = this.bullets[i].futureMove();
 
             if (this.isObjectDontTouchWalls(futureBullet))
             {
+                // 壁や画面枠に触れていない
                 this.bullets[i].move();
             }
             else
             {
+                // 壁や画面枠に触れる
+                // -> 弾を消去
                 this.bullets.shift();
             }
         }
 
         this.player.draw();
         this.walls.forEach(ey => ey.forEach(ex => ex.draw()));
-
-        // if (this.bullets.length) this.bullets.forEach(e => e.move());
         if (this.bullets.length) this.bullets.forEach(e => e.draw());
 
         this.player.resetVector();
