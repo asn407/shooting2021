@@ -192,7 +192,7 @@ class Main
             this.player.vector.y = 1;
             this.player.direction = "down";
         }
-        if (keyPush["z"]) this.bullets.push(this.player.shot());
+        if (keyPush["z"] && this.bullets.length < 5) this.bullets.push(this.player.shot());
     }
 
     isObjectDontTouchWalls(futureObject)
@@ -264,6 +264,10 @@ class Main
             if (this.isObjectDontTouchWalls(futureBullet))
             {
                 this.bullets[i].move();
+            }
+            else
+            {
+                this.bullets.shift();
             }
         }
 
