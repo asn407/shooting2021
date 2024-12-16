@@ -20,11 +20,6 @@ window.addEventListener("keyup", (e) => {
     keyPush[e.key] = false;
 });
 
-function resetKeyState(keyIndex)
-{
-    keyPush[keyIndex] = false;
-}
-
 class Block
 {
     constructor(x1, y1, width, height, color)
@@ -73,6 +68,15 @@ class Bullet extends Block
     }
 }
 
+class Vector
+{
+    constructor(x, y)
+    {
+        this.x = x;
+        this.y = y;
+    }
+}
+
 class Player extends Block
 {
     constructor(x1, y1, size, direction)
@@ -80,11 +84,18 @@ class Player extends Block
         super(x1, y1, size, size, "aqua");
         this.size = size;
         this.direction = direction;
+        this.vector = new Vector(0, 0);
     }
 
     copyPlayer()
     {
         return new Player(this.x1, this.y1, this.size, this.direction);
+    }
+
+    resetVector()
+    {
+        this.vector.x = 0;
+        this.vector.y = 0;
     }
 
     shot()
@@ -104,11 +115,6 @@ class Main
         context = this.canvas.getContext("2d");
 
         this.loopReqest = null;
-
-        // プレイヤーの方向ベクトル
-        // プレイヤーの当たり判定に用いる
-        this.playerVx = 0;
-        this.playerVy = 0;
 
         // オブジェクトのインスタンス化
         this.player = new Player(210, 250, 20, "up");
@@ -148,22 +154,22 @@ class Main
     {
         if (keyPush["ArrowLeft"])
         {
-            this.playerVx = -1;
+            this.player.vector.x = -1;
             this.player.direction = "left";
         }
         if (keyPush["ArrowUp"])
         {
-            this.playerVy = -1;
+            this.player.vector.y = -1;
             this.player.direction = "up";
         }
         if (keyPush["ArrowRight"])
         {
-            this.playerVx = 1;
+            this.player.vector.x = 1;
             this.player.direction = "right";
         }
         if (keyPush["ArrowDown"])
         {
-            this.playerVy = 1;
+            this.player.vector.y = 1;
             this.player.direction = "down";
         }
         if (keyPush["z"]) this.bullets.push(this.player.shot());
@@ -193,36 +199,41 @@ class Main
         return true;
     }
 
+    resetKeyState(keyIndex)
+    {
+        keyPush[keyIndex] = false;
+    }
+
     update()
     {
         // キー入力更新
         this.action();
 
         // プレイヤーのx軸方向の当たり判定
-        if (this.playerVx)
+        if (this.player.vector.x)
         {
             let futurePlayer = this.player.copyPlayer();
-            futurePlayer.x1 += this.playerVx;
-            futurePlayer.x2 += this.playerVx;
+            futurePlayer.x1 += this.player.vector.x;
+            futurePlayer.x2 += this.player.vector.x;
 
             if (this.isPlayerMoveable(futurePlayer))
             {
-                this.player.x1 += this.playerVx;
-                this.player.x2 += this.playerVx;
+                this.player.x1 += this.player.vector.x;
+                this.player.x2 += this.player.vector.x;
             }
         }
 
         // プレイヤーのy軸方向の当たり判定
-        if (this.playerVy)
+        if (this.player.vector.y)
         {
             let futurePlayer = this.player.copyPlayer();
-            futurePlayer.y1 += this.playerVy;
-            futurePlayer.y2 += this.playerVy;
+            futurePlayer.y1 += this.player.vector.y;
+            futurePlayer.y2 += this.player.vector.y;
 
             if (this.isPlayerMoveable(futurePlayer))
             {
-                this.player.y1 += this.playerVy;
-                this.player.y2 += this.playerVy;
+                this.player.y1 += this.player.vector.y;
+                this.player.y2 += this.player.vector.y;
             }
         }
 
@@ -232,8 +243,7 @@ class Main
         if (this.bullets.length) this.bullets.forEach(e => e.move());
         if (this.bullets.length) this.bullets.forEach(e => e.draw());
 
-        this.playerVx = 0;
-        this.playerVy = 0;
-        resetKeyState("z");
+        this.player.resetVector();
+        this.resetKeyState("z");
     }
 }
