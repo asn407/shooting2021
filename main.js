@@ -136,6 +136,8 @@ class Main
         // 2Dグラフィック描写のオブジェクトを取得
         context = this.canvas.getContext("2d");
 
+        // ループリクエスト
+        // ループキャンセルの引数として使用する
         this.loopReqest = null;
 
         // オブジェクトのインスタンス化
@@ -153,6 +155,8 @@ class Main
             }
         }
 
+        // 弾オブジェクトを格納する配列
+        // 初期段階は空
         this.bullets = [];
 
         // メインループ実行
