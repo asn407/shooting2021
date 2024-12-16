@@ -276,8 +276,7 @@ class Main
             }
             else
             {
-                // 壁や画面枠に触れる
-                // -> 弾を消去
+                // 壁や画面枠に触れている -> 弾を消去
                 this.bullets.shift();
             }
         }
