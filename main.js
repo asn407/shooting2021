@@ -57,7 +57,7 @@ class Bullet extends Block
 {
     constructor(x1, y1, direction)
     {
-        super(x1, y1, 5, 5, "yellow");
+        super(x1, y1, 6, 6, "yellow");
         this.direction = direction;
     }
 
@@ -88,7 +88,7 @@ class Player extends Block
 
     shot()
     {
-        return new Bullet(this.x1, this.y1, this.direction);
+        return new Bullet(this.x1 + 7, this.y1 + 7, this.direction);
     }
 }
 
