@@ -61,11 +61,12 @@ class Wall extends Block
 
 class Bullet extends Block
 {
-    constructor(x1, y1, size, direction)
+    constructor(x1, y1, size, direction, speed)
     {
         super(x1, y1, size, size, "yellow");
         this.size = size;
         this.direction = direction;
+        this.speed = speed;
     }
 
     copyBullet()
@@ -77,10 +78,10 @@ class Bullet extends Block
     {
         switch (this.direction)
         {
-            case "left":  this.x1--; break;
-            case "up":    this.y1--; break;
-            case "right": this.x1++; break;
-            case "down":  this.y1++; break;
+            case "left":  this.x1 -= this.speed; break;
+            case "up":    this.y1 -= this.speed; break;
+            case "right": this.x1 += this.speed; break;
+            case "down":  this.y1 += this.speed; break;
         }
     }
 
@@ -89,13 +90,25 @@ class Bullet extends Block
         let futureBullet = this.copyBullet();
         switch (this.direction)
         {
-            case "left":  futureBullet.x1--; break;
-            case "up":    futureBullet.y1--; break;
-            case "right": futureBullet.x1++; break;
-            case "down":  futureBullet.y1++; break;
+            case "left":  futureBullet.x1 -= this.speed; break;
+            case "up":    futureBullet.y1 -= this.speed; break;
+            case "right": futureBullet.x1 += this.speed; break;
+            case "down":  futureBullet.y1 += this.speed; break;
         }
 
         return futureBullet;
+    }
+}
+
+class EnemyBullet extends Bullet
+{}
+
+class Enemy extends Block
+{
+    constructor(x1, y1, size, name)
+    {
+        super(x1, y1, size, size, "white");
+        this.name = name;
     }
 }
 
@@ -122,7 +135,7 @@ class Player extends Block
 
     shot()
     {
-        return new Bullet(this.x1 + 7, this.y1 + 7, 6, this.direction);
+        return new Bullet(this.x1 + 7, this.y1 + 7, 6, this.direction, 2);
     }
 }
 
@@ -142,13 +155,14 @@ class Main
 
         // オブジェクトのインスタンス化
         this.player = new Player(210, 250, 20, "up");
+        this.enemy = new Enemy(210, 90, 20, "L");
 
         // オブジェクトのインスタンス化
         // 5x5の多次元配列に格納する
         this.walls = []
         for (let i = 0; i < 5; i++)
         {
-            this.walls[i] = []
+            this.walls[i] = [];
             for (let j = 0; j < 5; j++)
             {
                 this.walls[i][j] = new Wall(j * 80 + 40, i * 80 + 40, 40);
@@ -282,6 +296,7 @@ class Main
         }
 
         this.player.draw();
+        this.enemy.draw();
         this.walls.forEach(ey => ey.forEach(ex => ex.draw()));
         if (this.bullets.length) this.bullets.forEach(e => e.draw());
 
