@@ -1,7 +1,6 @@
 "use strict";
 
-const canvas = document.getElementById("canvas");
-const canvasContext = canvas.getContext("2d");
+let canvasContext;
 
 let keyPush = {};
 
@@ -21,6 +20,7 @@ class Vector
         this.y = y;
     }
 }
+
 class Block
 {
     constructor(x1, y1, width, height, color)
@@ -56,12 +56,18 @@ class Bullet extends Block
         super(x1, y1, 6, 6, "yellow");
         this.direction = direction;
         this.speed = 2;
+        this.move = false;
     }
 
     copyBullet()
     {
         return new Bullet(this.x1, this.y1, this.direction);
     }
+}
+
+class BulletManager()
+{
+
 }
 
 class Enemy extends Block
@@ -81,6 +87,7 @@ class Player extends Block
         this.direction = "up";
         this.vector = new Vector(0, 0);
         this.bullets = [];
+        this.move = false;
     }
 
     keyInput()
@@ -118,6 +125,7 @@ class Player extends Block
     {
         this.vector.x = 0;
         this.vector.y = 0;
+        this.move = false;
     }
 
     shot()
@@ -126,21 +134,22 @@ class Player extends Block
     }
 }
 
-class Game
+class Main
 {
     constructor()
     {
+        this.canvas = document.getElementById("canvas");
+        canvasContext = this.canvas.getContext("2d");
         this.loopReqest = null;
-        this.dontMove = false;
         this.player = new Player(210, 250);
         this.enemy = new Enemy(210, 90, "L");
         this.walls = [];
-        for (let i = 0; i < 5; i++)
+        for (let y = 0; y < 5; y++)
         {
-            this.walls[i] = [];
-            for (let j = 0; j < 5; j++)
+            this.walls[y] = [];
+            for (let x = 0; x < 5; x++)
             {
-                this.walls[i][j] = new Wall(j * 80 + 40, i * 80 + 40);
+                this.walls[y][x] = new Wall(x * 80 + 40, y * 80 + 40);
             }
         }
 
@@ -149,89 +158,9 @@ class Game
 
     loop()
     {
-        canvasContext.clearRect(0, 0, canvas.width, canvas.height);
+        canvasContext.clearRect(0, 0, this.canvas.width, this.canvas.height);
         this.update();
         this.loopReqest = window.requestAnimationFrame(this.loop.bind(this));
-    }
-
-    update()
-    {
-        this.player.keyInput();
-
-        // プレイヤーと壁との当たり判定
-        this.dontMove = false;
-        for (let y = 0; y < 5; y++)
-        {
-            for (let x = 0; x < 5; x++)
-            {
-                if (this.player.vector.x || this.player.vector.y)
-                {
-                    let futurePlayer = this.player.copyPlayer();
-                    futurePlayer.x1 += this.player.vector.x;
-                    futurePlayer.x2 += this.player.vector.x;
-                    futurePlayer.y1 += this.player.vector.y;
-                    futurePlayer.y2 += this.player.vector.y;
-        
-                    if (this.collisionObject(futurePlayer, this.walls[y][x])) dontMove = true;
-                    if (this.collisionFrame(futurePlayer)) dontMove = true;
-                }
-            }
-        }
-
-        if (dontMove == false)
-        {
-            this.player.x1 += this.player.vector.x;
-            this.player.x2 += this.player.vector.x;
-            this.player.y1 += this.player.vector.y;
-            this.player.y2 += this.player.vector.y;
-        }
-
-        // プレイヤーの弾と壁の当たり判定
-        this.dontMove = false;
-        for (let y = 0; y < 5; y++)
-        {
-            for (let x = 0; x < 5; x++)
-            {
-                for (let i = 0; i < this.player.bullets.length; i++)
-                {
-                    let futureBullet = this.player.bullets[i].copyBullet();
-                    switch (futureBullet.direction)
-                    {
-                        case "left":  futureBullet.x1 -= this.speed; break;
-                        case "up":    futureBullet.y1 -= this.speed; break;
-                        case "right": futureBullet.x1 += this.speed; break;
-                        case "down":  futureBullet.y1 += this.speed; break;
-                    }
-                    if (this.collisionObject(futureBullet, this.walls[y][x])) dontMove = true;
-                    if (this.collisionFrame(futureBullet)) dontMove = true;
-                }
-            }
-        }
-
-        if (dontMove == false)
-        {
-            for (let i = 0; i < this.player.bullets.length; i++)
-            {
-                switch (this.player.bullets[i].direction)
-                {
-                    case "left":  this.player.bullets[i].x1 -= this.player.bullets[i].speed; break;
-                    case "up":    this.player.bullets[i].y1 -= this.player.bullets[i].speed; break;
-                    case "right": this.player.bullets[i].x1 += this.player.bullets[i].speed; break;
-                    case "down":  this.player.bullets[i].y1 += this.player.bullets[i].speed; break;
-                }
-            }
-        }
-        else
-        {
-            this.player.bullets.shift();
-        }
-
-        this.player.draw();
-        this.enemy.draw();
-        this.walls.forEach(ey => ey.forEach(ex => ex.draw()));
-        if (this.bullets.length) this.bullets.forEach(e => e.draw());
-        this.player.resetVector();
-        this.resetKeyState("z");
     }
 
     collisionFrame(o)
@@ -255,5 +184,84 @@ class Game
     resetKeyState(keyIndex)
     {
         keyPush[keyIndex] = false;
+    }
+
+    update()
+    {
+        this.player.keyInput();
+
+        // プレイヤーと壁との当たり判定
+        for (let y = 0; y < 5; y++)
+        {
+            for (let x = 0; x < 5; x++)
+            {
+                if (this.player.vector.x || this.player.vector.y)
+                {
+                    let futurePlayer = this.player.copyPlayer();
+                    futurePlayer.x1 += this.player.vector.x;
+                    futurePlayer.x2 += this.player.vector.x;
+                    futurePlayer.y1 += this.player.vector.y;
+                    futurePlayer.y2 += this.player.vector.y;
+        
+                    if (this.collisionObject(futurePlayer, this.walls[y][x])) this.player.move = false;
+                    if (this.collisionFrame(futurePlayer)) this.player.move = false;
+                }
+            }
+        }
+
+        if (this.player.move)
+        {
+            this.player.x1 += this.player.vector.x;
+            this.player.x2 += this.player.vector.x;
+            this.player.y1 += this.player.vector.y;
+            this.player.y2 += this.player.vector.y;
+        }
+
+        for (let y = 0; y < 5; y++)
+        {
+            for (let x = 0; x < 5; x++)
+            {
+                for (let i = 0; i < this.player.bullets.length; i++)
+                {
+                    let futureBullet = this.player.bullets[i].copyBullet();
+                    switch (futureBullet.direction)
+                    {
+                        case "left":  futureBullet.x1 -= this.speed; break;
+                        case "up":    futureBullet.y1 -= this.speed; break;
+                        case "right": futureBullet.x1 += this.speed; break;
+                        case "down":  futureBullet.y1 += this.speed; break;
+                    }
+                    if (this.collisionObject(futureBullet, this.walls[y][x])) this.player.bullets[i].move = false;
+                    if (this.collisionFrame(futureBullet)) this.player.bullets[i].move = false;
+                }
+            }
+        }
+
+        for (let i = 0; i < this.player.bullets.length; i++)
+        {
+            if (this.player.bullets[i].move)
+            {
+                switch (this.player.bullets[i].direction)
+                {
+                    case "left":  this.player.bullets[i].x1 -= this.player.bullets[i].speed; break;
+                    case "up":    this.player.bullets[i].y1 -= this.player.bullets[i].speed; break;
+                    case "right": this.player.bullets[i].x1 += this.player.bullets[i].speed; break;
+                    case "down":  this.player.bullets[i].y1 += this.player.bullets[i].speed; break;
+                }
+            }
+            else
+            {
+                this.player.bullets.shift();
+            }
+        }
+
+
+        this.player.draw();
+        this.enemy.draw();
+        this.walls.forEach(ey => ey.forEach(ex => ex.draw()));
+        if (this.player.bullets.length) this.player.bullets.forEach(e => e.draw());
+        
+        this.player.resetVector();
+        this.resetKeyState("z");
     }
 }
