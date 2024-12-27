@@ -13,10 +13,10 @@ window.addEventListener("keyup", (e) => {
 
 function CollisionChecker(o1, o2)
 {
-    if (o1.x2 <= o2.x1) return false;
-    if (o1.y2 <= o2.y1) return false;
-    if (o2.x2 <= o1.x1) return false;
-    if (o2.y2 <= o1.y1) return false;
+    if (o1.x2 < o2.x) return false;
+    if (o1.y2 < o2.y) return false;
+    if (o2.x2 < o1.x) return false;
+    if (o2.y2 < o1.y) return false;
     return true;
 }
 
@@ -128,7 +128,7 @@ class Player extends Block
         this.direction = "up";
     }
 
-    move()
+    action()
     {
         if (keyPush["ArrowLeft"])
         {
@@ -150,9 +150,20 @@ class Player extends Block
             this.vector.y = 1;
             this.direction = "down";
         }
+        // if (keyPush["z"]) {}
+    }
 
-        this.x += this.vector.x;
-        this.y += this.vector.y;
+    copyPlayer()
+    {
+        return new Player(this.x, this.y);
+    }
+
+    move()
+    {
+        this.x  += this.vector.x;
+        this.x2 += this.vector.x;
+        this.y  += this.vector.y;
+        this.y2 += this.vector.y;
     }
 
     resetVector()
@@ -185,7 +196,18 @@ class Game
 
     update()
     {
-        this.player.move();
+        this.player.action();
+        if (this.player.vector.x || this.player.vector.y)
+        {
+            let futurePlayer = this.player.copyPlayer();
+            futurePlayer.move();
+
+            if (this.wallManager.collision(futurePlayer) == false)
+            {
+                this.player.move();
+            }
+        }
+
         this.player.resetVector();
         this.player.draw();
         this.enemy.draw();
