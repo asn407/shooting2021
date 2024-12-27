@@ -207,7 +207,7 @@ class Game
             let futurePlayer = this.player.copyPlayer();
             futurePlayer.moveX();
 
-            if (!this.wallManager.collision(futurePlayer))
+            if (!this.wallManager.collision(futurePlayer) && !this.collisionCanvas(futurePlayer))
             {
                 this.player.moveX();
             }
@@ -218,7 +218,7 @@ class Game
             let futurePlayer = this.player.copyPlayer();
             futurePlayer.moveY();
 
-            if (!this.wallManager.collision(futurePlayer))
+            if (!this.wallManager.collision(futurePlayer) && !this.collisionCanvas(futurePlayer))
             {
                 this.player.moveY();
             }
@@ -237,5 +237,14 @@ class Game
         }
 
         this.player.resetVector();
+    }
+
+    collisionCanvas(block)
+    {
+        if (block.x < 0) return true;
+        if (block.y < 0) return true;
+        if (this.canvas.width  < block.x2) return true;
+        if (this.canvas.height < block.y2) return true;
+        return false;
     }
 }
