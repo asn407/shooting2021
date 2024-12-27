@@ -2,6 +2,7 @@
 
 let context;
 let keyPush = {};
+let keyFlag = {};
 const debug = true;
 
 window.addEventListener("keydown", (e) => {
@@ -10,7 +11,23 @@ window.addEventListener("keydown", (e) => {
 
 window.addEventListener("keyup", (e) => {
     keyPush[e.key] = false;
-})
+});
+
+function KeyPressed(keyIndex)
+{
+    if (keyPush[keyIndex] && !keyFlag[keyIndex])
+    {
+        keyFlag[keyIndex] = true;
+        return true;
+    }
+
+    if (!keyPush[keyIndex])
+    {
+        keyFlag[keyIndex] = false;
+    }
+
+    return false;
+}
 
 function CollisionChecker(block1, block2)
 {
@@ -109,6 +126,22 @@ class Bullet extends Block
         this.direction = direction;
         this.speed = 2;
     }
+
+    move()
+    {
+        switch (this.direction)
+        {
+            case "left":  this.x -= this.speed; break;
+            case "up":    this.y -= this.speed; break;
+            case "right": this.x += this.speed; break;
+            case "down":  this.y += this.speed; break;
+        }
+    }
+
+    copyBullet()
+    {
+        return new Bullet(this.x, this.y, this.direction);
+    }
 }
 
 class Enemy extends Block
@@ -127,6 +160,7 @@ class Player extends Block
         super(x, y, 20, 20, "aqua");
         this.vector = new Vector(Vx, Vy);
         this.direction = "up";
+        this.bullets = [];
     }
 
     keyInput()
@@ -151,7 +185,10 @@ class Player extends Block
             this.vector.y = 1;
             this.direction = "down";
         }
-        // if (keyPush["z"]) {}
+        if (KeyPressed("z") && this.bullets.length < 5)
+        {
+            this.bullets.push(this.shot());
+        }
     }
 
     copyPlayer()
@@ -169,6 +206,11 @@ class Player extends Block
     {
         this.y  += this.vector.y;
         this.y2 += this.vector.y;
+    }
+
+    shot()
+    {
+        return new Bullet(this.x + 7, this.y + 7, this.direction);
     }
 
     resetVector()
@@ -202,6 +244,7 @@ class Game
     update()
     {
         this.player.keyInput();
+
         if (this.player.vector.x)
         {
             let futurePlayer = this.player.copyPlayer();
@@ -224,7 +267,26 @@ class Game
             }
         }
 
+        for (let i = 0; i < this.player.bullets.length; i++)
+        {
+            let futureBullet = this.player.bullets[i].copyBullet();
+            futureBullet.move();
+
+            if (!this.wallManager.collision(futureBullet) && !this.collisionCanvas(futureBullet))
+            {
+                this.player.bullets[i].move();
+            }
+            else
+            {
+                this.player.bullets.splice(i, 1);
+            }
+        }
+
         this.player.draw();
+        if (this.player.bullets.length)
+        {
+            this.player.bullets.forEach(e => e.draw());
+        }
         this.enemy.draw();
         this.wallManager.draw();
 
@@ -234,6 +296,7 @@ class Game
             context.fillStyle="white";
             context.fillText("X : " + this.player.x + " Y : " + this.player.y, 10, 20);
             context.fillText("vecX : " + this.player.vector.x + " vecY : " + this.player.vector.y, 10, 40);
+            context.fillText("Remain : " + (5 - this.player.bullets.length), 10, 60);
         }
 
         this.player.resetVector();
