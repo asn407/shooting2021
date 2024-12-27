@@ -159,10 +159,14 @@ class Player extends Block
         return new Player(this.x, this.y, this.vector.x, this.vector.y);
     }
 
-    move()
+    moveX()
     {
         this.x  += this.vector.x;
         this.x2 += this.vector.x;
+    }
+
+    moveY()
+    {
         this.y  += this.vector.y;
         this.y2 += this.vector.y;
     }
@@ -198,14 +202,25 @@ class Game
     update()
     {
         this.player.keyInput();
-        if (this.player.vector.x || this.player.vector.y)
+        if (this.player.vector.x)
         {
             let futurePlayer = this.player.copyPlayer();
-            futurePlayer.move();
+            futurePlayer.moveX();
 
             if (!this.wallManager.collision(futurePlayer))
             {
-                this.player.move();
+                this.player.moveX();
+            }
+        }
+
+        if (this.player.vector.y)
+        {
+            let futurePlayer = this.player.copyPlayer();
+            futurePlayer.moveY();
+
+            if (!this.wallManager.collision(futurePlayer))
+            {
+                this.player.moveY();
             }
         }
 
