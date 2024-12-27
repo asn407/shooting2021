@@ -2,6 +2,7 @@
 
 let context;
 let keyPush = {};
+const debug = true;
 
 window.addEventListener("keydown", (e) => {
     keyPush[e.key] = true;
@@ -11,12 +12,12 @@ window.addEventListener("keyup", (e) => {
     keyPush[e.key] = false;
 })
 
-function CollisionChecker(o1, o2)
+function CollisionChecker(block1, block2)
 {
-    if (o1.x2 < o2.x) return false;
-    if (o1.y2 < o2.y) return false;
-    if (o2.x2 < o1.x) return false;
-    if (o2.y2 < o1.y) return false;
+    if (block1.x2 <= block2.x) return false;
+    if (block1.y2 <= block2.y) return false;
+    if (block2.x2 <= block1.x) return false;
+    if (block2.y2 <= block1.y) return false;
     return true;
 }
 
@@ -72,13 +73,13 @@ class WallManager
         }
     }
 
-    collision(obj)
+    collision(block)
     {
         for (let y = 0; y < 5; y++)
         {
             for (let x = 0; x < 5; x++)
             {
-                if (CollisionChecker(obj, this.walls[y][x]))
+                if (CollisionChecker(block, this.walls[y][x]))
                 {
                     return true;
                 }
@@ -121,14 +122,14 @@ class Enemy extends Block
 
 class Player extends Block
 {
-    constructor(x, y)
+    constructor(x, y, Vx, Vy)
     {
         super(x, y, 20, 20, "aqua");
-        this.vector = new Vector(0, 0);
+        this.vector = new Vector(Vx, Vy);
         this.direction = "up";
     }
 
-    action()
+    keyInput()
     {
         if (keyPush["ArrowLeft"])
         {
@@ -155,7 +156,7 @@ class Player extends Block
 
     copyPlayer()
     {
-        return new Player(this.x, this.y);
+        return new Player(this.x, this.y, this.vector.x, this.vector.y);
     }
 
     move()
@@ -180,7 +181,7 @@ class Game
         context = this.canvas.getContext("2d");
 
         this.loopReqest = null;
-        this.player = new Player(210, 250);
+        this.player = new Player(210, 250, 0, 0);
         this.enemy = new Enemy(210, 90, "L");
         this.wallManager = new WallManager;
 
@@ -196,21 +197,30 @@ class Game
 
     update()
     {
-        this.player.action();
+        this.player.keyInput();
         if (this.player.vector.x || this.player.vector.y)
         {
             let futurePlayer = this.player.copyPlayer();
             futurePlayer.move();
 
-            if (this.wallManager.collision(futurePlayer) == false)
+            if (!this.wallManager.collision(futurePlayer))
             {
                 this.player.move();
             }
         }
 
-        this.player.resetVector();
         this.player.draw();
         this.enemy.draw();
         this.wallManager.draw();
+
+        if (debug)
+        {
+            context.font="15px 'Impact'";
+            context.fillStyle="white";
+            context.fillText("X : " + this.player.x + " Y : " + this.player.y, 10, 20);
+            context.fillText("vecX : " + this.player.vector.x + " vecY : " + this.player.vector.y, 10, 40);
+        }
+
+        this.player.resetVector();
     }
 }
