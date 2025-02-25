@@ -221,10 +221,9 @@ class Player extends Block
 
 class Game
 {
-    constructor()
+    constructor(canvas)
     {
-        this.canvas = document.getElementById("canvas");
-        context = this.canvas.getContext("2d");
+        this.canvas = canvas;
 
         this.loopReqest = null;
         this.player = new Player(210, 250, 0, 0);
@@ -309,5 +308,16 @@ class Game
         if (this.canvas.width  < block.x2) return true;
         if (this.canvas.height < block.y2) return true;
         return false;
+    }
+}
+
+class Main
+{
+    constructor()
+    {
+        this.canvas = document.getElementById("canvas");
+        context = this.canvas.getContext("2d");
+
+        new Game(this.canvas);
     }
 }
